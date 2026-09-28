@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="NexusStore - High Performance Product Inventory & Catalog Management built on Node.js, Express, and MongoDB Atlas.">
+    <meta name="theme-color" content="#0b0f19">
+    <title>NexusStore | Product & Inventory Management</title>
+    <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Background glowing ambient orbs -->
+    <div class="ambient-glow glow-1" aria-hidden="true"></div>
+    <div class="ambient-glow glow-2" aria-hidden="true"></div>
+
+    <!-- Header Navigation -->
+    <header class="app-header">
+        <div class="header-container">
+            <div class="brand-section">
+                <div class="brand-logo-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="brand-title">Nexus<span class="gradient-text">Store</span></h1>
+                    <p class="brand-subtitle">MongoDB Atlas Product Catalog</p>
+                </div>
+            </div>
+
+            <!-- Server & DB Status Badge -->
+            <div class="header-actions">
+                <div id="dbStatusBadge" class="status-pill status-connecting" title="Checking database status...">
+                    <span class="pulse-indicator"></span>
+                    <span id="dbStatusText">Connecting DB...</span>
+                </div>
+
+                <button id="btnSeedData" class="btn btn-secondary" title="Load sample electronics products">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                    <span>Seed Demo</span>
+                </button>
+
+                <button id="btnOpenCreateModal" class="btn btn-primary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>New Product</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-content">
+        <!-- Live Real-Time Metrics -->
+        <section class="stats-grid" aria-label="Catalog Overview Statistics">
+            <div class="stat-card">
+                <div class="stat-icon-wrapper icon-indigo">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                    </svg>
+                </div>
+                <div class="stat-details">
+                    <span class="stat-label">Total Products</span>
+                    <span id="statTotalProducts" class="stat-value">0</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon-wrapper icon-emerald">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                </div>
+                <div class="stat-details">
+                    <span class="stat-label">Inventory Value</span>
+                    <span id="statTotalValue" class="stat-value">$0</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon-wrapper icon-violet">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                </div>
+                <div class="stat-details">
+                    <span class="stat-label">Average Price</span>
+                    <span id="statAvgPrice" class="stat-value">$0</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon-wrapper icon-amber">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                </div>
+                <div class="stat-details">
+                    <span class="stat-label">Unique Brands</span>
+                    <span id="statTotalBrands" class="stat-value">0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Search, Filter & View Controls -->
+        <section class="toolbar-section">
+            <div class="search-container">
+                <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search by product name, brand, or category..." autocomplete="off">
+                <button id="btnClearSearch" class="btn-clear-search hidden" title="Clear search" aria-label="Clear search">
+                    ✕
+                </button>
+            </div>
+
+            <div class="filter-controls">
+                <!-- Brand Filter -->
+                <div class="select-wrapper">
+                    <select id="brandSelect" class="custom-select" aria-label="Filter by brand">
+                        <option value="ALL">All Brands</option>
+                    </select>
+                </div>
+
+                <!-- Sort Order -->
+                <div class="select-wrapper">
+                    <select id="sortSelect" class="custom-select" aria-label="Sort products">
+                        <option value="newest">Latest Added</option>
+                        <option value="price-asc">Price: Low to High</option>
+                        <option value="price-desc">Price: High to Low</option>
+                        <option value="name-asc">Name: A to Z</option>
+                    </select>
+                </div>
+
+                <!-- View Switcher -->
+                <div class="view-switcher" role="group" aria-label="Display View Mode">
+                    <button id="viewGridBtn" class="btn-icon active" title="Grid View" aria-label="Grid View">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                    </button>
+                    <button id="viewTableBtn" class="btn-icon" title="Table View" aria-label="Table View">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="8" y1="6" x2="21" y2="6"></line>
+                            <line x1="8" y1="12" x2="21" y2="12"></line>
+                            <line x1="8" y1="18" x2="21" y2="18"></line>
+                            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+
+                <button id="btnRefresh" class="btn-icon" title="Refresh products" aria-label="Refresh">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="23 4 23 10 17 10"></polyline>
+                        <polyline points="1 20 1 14 7 14"></polyline>
+                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                    </svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- Category Pills Bar -->
+        <section class="category-pills-bar" id="categoryPillsContainer" aria-label="Categories">
+            <button class="pill-chip active" data-category="ALL">All Categories</button>
+            <button class="pill-chip" data-category="Laptops">💻 Laptops</button>
+            <button class="pill-chip" data-category="Smartphones">📱 Smartphones</button>
+            <button class="pill-chip" data-category="Audio">🎧 Audio</button>
+            <button class="pill-chip" data-category="Displays">🖥️ Displays</button>
+            <button class="pill-chip" data-category="Accessories">⌨️ Accessories</button>
+        </section>
+
+        <!-- Results Counter & Live Indicator -->
+        <div class="results-header">
+            <span id="resultsCountText" class="results-count">Loading products...</span>
+            <span class="api-endpoint-badge">REST API: <code>/products</code></span>
+        </div>
+
+        <!-- Product Grid Container -->
+        <div id="productContainer" class="product-grid">
+            <!-- Loading Skeleton Cards -->
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+        </div>
+
+        <!-- Table View Container (Hidden by default) -->
+        <div id="productTableWrapper" class="table-container hidden">
+            <table class="product-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Brand</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Rating</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="productTableBody">
+                    <!-- Populated via JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Empty State (Shown when no items match) -->
+        <div id="emptyState" class="empty-state hidden">
+            <div class="empty-icon-circle">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                </svg>
+            </div>
+            <h3 class="empty-title">No products found</h3>
+            <p id="emptyMessage" class="empty-description">We couldn't find any products matching your criteria.</p>
+            <div class="empty-actions">
+                <button id="btnEmptyReset" class="btn btn-secondary">Clear Filters</button>
+                <button id="btnEmptySeed" class="btn btn-primary">⚡ Load Sample Inventory</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <p>NexusStore • Node.js & Express REST API with MongoDB Atlas • Built with precision & vanilla modern CSS</p>
+    </footer>
+
+    <!-- Create / Edit Product Modal -->
+    <div id="productModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div>
+                    <h2 id="modalTitle" class="modal-heading">Add New Product</h2>
+                    <p id="modalSubtitle" class="modal-subheading">Fill in the details to add an item to MongoDB</p>
+                </div>
+                <button id="btnCloseModal" class="btn-close-modal" aria-label="Close modal">✕</button>
+            </div>
+
+            <form id="productForm" class="modal-form" novalidate>
+                <input type="hidden" id="editProductId" value="">
+
+                <div class="form-group">
+                    <label for="inputName" class="form-label">Product Name <span class="required-star">*</span></label>
+                    <input type="text" id="inputName" class="form-input" placeholder="e.g. MacBook Pro 16&quot;" required>
+                    <span class="field-error" id="errorName"></span>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="inputBrand" class="form-label">Brand <span class="required-star">*</span></label>
+                        <input type="text" id="inputBrand" class="form-input" placeholder="e.g. Apple, Sony, Dell" required>
+                        <span class="field-error" id="errorBrand"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputPrice" class="form-label">Price ($ USD) <span class="required-star">*</span></label>
+                        <input type="number" id="inputPrice" class="form-input" placeholder="e.g. 1299" min="0" step="0.01" required>
+                        <span class="field-error" id="errorPrice"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="inputCategory" class="form-label">Category</label>
+                        <select id="inputCategory" class="form-select">
+                            <option value="Electronics">Electronics</option>
+                            <option value="Laptops">Laptops</option>
+                            <option value="Smartphones">Smartphones</option>
+                            <option value="Audio">Audio</option>
+                            <option value="Displays">Displays</option>
+                            <option value="Accessories">Accessories</option>
+                            <option value="Wearables">Wearables</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputStock" class="form-label">Stock Units</label>
+                        <input type="number" id="inputStock" class="form-input" placeholder="10" min="0" value="10">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="inputDescription" class="form-label">Description</label>
+                    <textarea id="inputDescription" class="form-textarea" rows="3" placeholder="Brief technical specifications or features..."></textarea>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" id="btnCancelModal" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" id="btnSaveProduct" class="btn btn-primary">
+                        <span id="saveButtonSpinner" class="spinner hidden"></span>
+                        <span id="saveButtonText">Save Product</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Modal -->
+    <div id="deleteModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+        <div class="modal-card modal-delete-card">
+            <div class="delete-icon-wrapper">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+            </div>
+            <h3 id="deleteModalTitle" class="modal-heading text-center">Delete Product</h3>
+            <p class="modal-subheading text-center">
+                Are you sure you want to remove <strong id="deleteProductName" class="text-white">this product</strong>? This action cannot be undone.
+            </p>
+            <div class="modal-footer justify-center">
+                <button type="button" id="btnCancelDelete" class="btn btn-secondary">Cancel</button>
+                <button type="button" id="btnConfirmDelete" class="btn btn-danger">
+                    <span id="deleteButtonSpinner" class="spinner hidden"></span>
+                    <span id="deleteButtonText">Delete Permanently</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
